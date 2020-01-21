@@ -68,7 +68,9 @@ def Main(train=True):
     model = Model(tensor, out)
     model.compile('adam', 'categorical_crossentropy', ['acc'])
     model.summary()
-    model.load_weights(LoadSavedModel())
+    latest_model = LoadSavedModel()
+    if latest_model:
+        model.load_weights(latest_model)
     if train:
         model.fit(trimg, trlabel, 4, 20, verbose=2, callbacks=Callback_list(), validation_data=(teimg, telabel))
     else:

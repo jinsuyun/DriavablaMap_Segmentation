@@ -9,18 +9,17 @@ ds = 'D:/Dataset/bdd100k/'
 def LoadImg(dirs, stop, div, one_hot=False):
     array = []
     for n, dir_ in enumerate(dirs):
-        # 이미지를 읽고 전처리
         img = cv.imread(dir_, cv.IMREAD_REDUCED_COLOR_4)
+
+        cv.imshow('Load', img)
+        cv.waitKey(1)
+
         if div:
             img = np.array(img) / 255.
         if one_hot:
             img = to_categorical(img, 3)
 
         array.append(img)
-
-        # 이미지 확인
-        cv.imshow('Load', img)
-        cv.waitKey(2)
 
         # 정해진 범위에서 멈춤
         if n + 1 == stop:
@@ -52,10 +51,10 @@ def Main():
 
     print('Load img..')
     stop = 2000
-    trlabel = LoadImg(trlabel_path, stop, True)
-    trimg = LoadImg(trimg_path, stop, True)
-    telabel = LoadImg(telabel_path, stop // 5, True)
-    teimg = LoadImg(teimg_path, stop // 5, True)
+    trlabel = LoadImg(trlabel_path, stop, True, True)
+    trimg = LoadImg(trimg_path, stop, True, False)
+    telabel = LoadImg(telabel_path, stop // 5, True, True)
+    teimg = LoadImg(teimg_path, stop // 5, True, False)
     cv.destroyAllWindows()
     print('Finished')
 

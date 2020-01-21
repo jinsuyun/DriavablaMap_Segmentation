@@ -16,8 +16,6 @@ def LoadImg(dirs, stop, div, one_hot=False):
 
         if div:
             img = np.array(img) / 255.
-        if one_hot:
-            img = to_categorical(img, 3)
 
         array.append(img)
 
@@ -51,11 +49,21 @@ def Main():
 
     print('Load img..')
     stop = 2000
-    trlabel = LoadImg(trlabel_path, stop, True, True)
-    trimg = LoadImg(trimg_path, stop, True, False)
-    telabel = LoadImg(telabel_path, stop // 5, True, True)
-    teimg = LoadImg(teimg_path, stop // 5, True, False)
+    trlabel = LoadImg(trlabel_path, stop, True)
+    trimg = LoadImg(trimg_path, stop, True)
+    telabel = LoadImg(telabel_path, stop // 5, True)
+    teimg = LoadImg(teimg_path, stop // 5, True)
     cv.destroyAllWindows()
     print('Finished')
 
     return (trimg, trlabel), (teimg, telabel)
+
+
+def OneHot(imgs):
+    result = []
+    for img in imgs:
+        result.append(to_categorical(img, 3))
+
+    result = np.array(result)
+
+    return result

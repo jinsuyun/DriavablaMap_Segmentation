@@ -14,17 +14,18 @@ def LoadImg(dirs, stop, div):
         if div:
             img = np.array(img) / 255.
 
-        array.append(img.astype(np.float))
+        array.append(img)
 
         # 이미지 확인
-        cv.imshow('Loaded', img)
-        cv.waitKey(1)
+        cv.imshow('Load', img)
+        cv.waitKey(2)
 
         # 정해진 범위에서 멈춤
         if n + 1 == stop:
+            array = np.array(array)
             break
 
-    return np.array(array)
+    return array
 
 
 def Match(dirs, place):
@@ -48,7 +49,7 @@ def Main():
     teimg_path = Match(telabel_path, 'val')
 
     print('Load img..')
-    stop = 1000
+    stop = 100
     trlabel = LoadImg(trlabel_path, stop, True)
     trimg = LoadImg(trimg_path, stop, True)
     telabel = LoadImg(telabel_path, stop // 5, True)

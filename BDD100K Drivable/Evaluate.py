@@ -10,7 +10,4 @@ ds = 'D:/Dataset/bdd100k/images/100k/test/'
 dirs = glob.glob(ds + '*.jpg')
 np.random.shuffle(dirs)
 img = Load.LoadImg(dirs, 2, False)
-(trimg, trlabel), (teimg, telabel) = Load.Main()
-img1, img2 = Generator.Main(trimg, trlabel)
-print(img1.shape)
-cv.destroyAllWindows()
+print(img.shape)

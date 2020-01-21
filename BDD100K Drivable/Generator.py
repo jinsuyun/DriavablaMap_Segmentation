@@ -35,7 +35,7 @@ def Main(img1, img2):
 
         concat = cv.hconcat([img_file, label_file])
         font = cv.FONT_HERSHEY_PLAIN
-        cv.putText(concat, str(Rotation) + str(Flip), (w_center * 2, h_center), font, 2, (255, 255, 255))
+        cv.putText(concat, str(Rotation) + str(Flip), (w_center * 2, h_center), font, 2, (255, 200, 255))
         cv.imshow('Generator', concat)
         cv.waitKey(1)
 

@@ -28,7 +28,6 @@ def Main(train=True):
     if train:
         (trimg, trlabel), (teimg, telabel) = Load.Main()
         trimg, trlabel = Generator.Main(trimg, trlabel)
-        trlabel, telabel = Load.OneHot(trlabel), Load.OneHot(telabel)
     else:
         trimg = tf.zeros([1, 180, 320, 3])
 

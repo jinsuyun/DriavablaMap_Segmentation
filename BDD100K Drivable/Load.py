@@ -1,4 +1,3 @@
-from tensorflow.keras.utils import to_categorical
 import cv2 as cv
 import numpy as np
 import glob
@@ -6,7 +5,7 @@ import glob
 ds = 'D:/Dataset/bdd100k/'
 
 
-def LoadImg(dirs, stop, div, one_hot=False):
+def LoadImg(dirs, stop, div):
     array = []
     for n, dir_ in enumerate(dirs):
         img = cv.imread(dir_, cv.IMREAD_REDUCED_COLOR_4)
@@ -19,7 +18,6 @@ def LoadImg(dirs, stop, div, one_hot=False):
 
         array.append(img)
 
-        # 정해진 범위에서 멈춤
         if n + 1 == stop:
             array = np.array(array)
             break
@@ -57,13 +55,3 @@ def Main():
     print('Finished')
 
     return (trimg, trlabel), (teimg, telabel)
-
-
-def OneHot(imgs):
-    result = []
-    for img in imgs:
-        result.append(to_categorical(img, 3))
-
-    result = np.array(result)
-
-    return result

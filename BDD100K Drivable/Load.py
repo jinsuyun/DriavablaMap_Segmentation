@@ -1,4 +1,4 @@
-import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 import cv2 as cv
 import numpy as np
 import glob
@@ -6,13 +6,15 @@ import glob
 ds = 'D:/Dataset/bdd100k/'
 
 
-def LoadImg(dirs, stop, div):
+def LoadImg(dirs, stop, div, one_hot=False):
     array = []
     for n, dir_ in enumerate(dirs):
         # 이미지를 읽고 전처리
         img = cv.imread(dir_, cv.IMREAD_REDUCED_COLOR_4)
         if div:
             img = np.array(img) / 255.
+        if one_hot:
+            img = to_categorical(img, 3)
 
         array.append(img)
 

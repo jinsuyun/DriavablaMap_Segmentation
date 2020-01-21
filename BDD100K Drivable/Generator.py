@@ -10,7 +10,7 @@ def Main(img1, img2):
 
     for n, img_file in enumerate(img1):
         # 랜덤 회전
-        Rotation = np.random.randint(rotation)
+        Rotation = np.random.rand(1) * rotation
         if np.random.rand(1) < 0.5:
             Rotation = -Rotation
 
@@ -39,6 +39,7 @@ def Main(img1, img2):
         cv.imshow('Generator', concat)
         cv.waitKey(1)
 
+    cv.destroyAllWindows()
     img_result, label_result = np.array(img_result), np.array(label_result)
 
     return img_result, label_result

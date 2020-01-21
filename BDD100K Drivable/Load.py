@@ -49,7 +49,7 @@ def Main():
     teimg_path = Match(telabel_path, 'val')
 
     print('Load img..')
-    stop = 100
+    stop = 2000
     trlabel = LoadImg(trlabel_path, stop, True)
     trimg = LoadImg(trimg_path, stop, True)
     telabel = LoadImg(telabel_path, stop // 5, True)

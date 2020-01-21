@@ -89,8 +89,8 @@ def LoadSavedModel():
 
 def Callback_list():
     lists = [
-        EarlyStopping(patience=10, restore_best_weights=True),
+        EarlyStopping(patience=10),
         ReduceLROnPlateau(factor=0.25, patience=8, verbose=1),
-        ModelCheckpoint('D:/Model/model_{val_acc:.4f}.h5', verbose=1)
+        ModelCheckpoint('D:/Model/model_{val_acc:.4f}.h5', verbose=1, save_best_only=True)
     ]
     return lists

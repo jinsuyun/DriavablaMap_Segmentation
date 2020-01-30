@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import glob
+import Generator
 
 ds = 'D:/Dataset/bdd100k/'
 
@@ -9,6 +10,7 @@ def LoadImg(dirs, stop, div):
     array = []
     for n, dir_ in enumerate(dirs):
         img = cv.imread(dir_, cv.IMREAD_REDUCED_COLOR_4)
+        print(img.shape)
 
         cv.imshow('Load', img)
         cv.waitKey(1)
@@ -46,12 +48,13 @@ def Main():
     teimg_path = Match(telabel_path, 'val')
 
     print('Load img..')
-    stop = 2000
+    stop = 1000
     trlabel = LoadImg(trlabel_path, stop, True)
     trimg = LoadImg(trimg_path, stop, True)
     telabel = LoadImg(telabel_path, stop // 5, True)
     teimg = LoadImg(teimg_path, stop // 5, True)
     cv.destroyAllWindows()
+    trimg, trlabel = Generator.Main(trimg, trlabel)
     print('Finished')
 
     return (trimg, trlabel), (teimg, telabel)

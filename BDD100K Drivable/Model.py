@@ -1,23 +1,17 @@
 from tensorflow.keras import Input, Model
 import tensorflow.keras.layers as L
-import tensorflow.keras.backend as K
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, Callback
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import tensorflow as tf
 import glob
 import os
-import Generator
 import Load
 
 
 def Conv(tensor, ch, kernel=3):
     x = L.Conv2D(ch, kernel, padding='same')(tensor)
     x = L.BatchNormalization()(x)
-    x = Mish(x)
+    x = L.LeakyReLU(0.1)(x)
     return x
-
-
-def Mish(tensor):
-    return tensor * (K.tanh(K.softplus(tensor)))
 
 
 def Main(train=True):
@@ -27,7 +21,6 @@ def Main(train=True):
 
     if train:
         (trimg, trlabel), (teimg, telabel) = Load.Main()
-        trimg, trlabel = Generator.Main(trimg, trlabel)
     else:
         trimg = tf.zeros([1, 180, 320, 3])
 

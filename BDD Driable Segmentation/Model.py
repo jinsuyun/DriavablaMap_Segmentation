@@ -23,26 +23,27 @@ def Upsampling_block(input1, input2):
 
 
 def Build():
-    tensor = Input([320, 180, 3])
+    tensor = Input([180, 320, 3])
+    ch = 8
 
-    d1 = Conv_block(tensor, 16)
-    d1 = Conv_block(d1, 16)
+    d1 = Conv_block(tensor, ch)
+    d1 = Conv_block(d1, ch)
     m = L.MaxPool2D()(d1)
 
-    d2 = Conv_block(m, 32)
-    d2 = Conv_block(d2, 32)
+    d2 = Conv_block(m, ch * 2)
+    d2 = Conv_block(d2, ch * 2)
     m = L.MaxPool2D()(d2)
 
-    e = Conv_block(m, 64)
-    e = Conv_block(e, 64)
+    e = Conv_block(m, ch * 4)
+    e = Conv_block(e, ch * 4)
     m = Upsampling_block(e, d2)
 
-    u2 = Conv_block(m, 32)
-    u2 = Conv_block(u2, 32)
+    u2 = Conv_block(m, ch * 2)
+    u2 = Conv_block(u2, ch * 2)
     m = Upsampling_block(u2, d1)
 
-    u1 = Conv_block(m, 16)
-    u1 = Conv_block(u1, 16)
+    u1 = Conv_block(m, ch)
+    u1 = Conv_block(u1, ch)
 
     e = Conv_block(u1, 3)
 

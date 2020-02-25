@@ -1,5 +1,5 @@
 from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
-import Load
+import Data
 import Model
 
 path = 'D:/Saved Model/'
@@ -9,6 +9,7 @@ callback = [
     ModelCheckpoint(path + 'model_{val_acc:.4f}.h5', verbose=1, save_best_only=True)
 ]
 
-tr_batch, te_batch = Load.LoadData()
+tr_batch, te_batch = Data.Load()
 
 model = Model.Build()
+model.fit(tr_batch, epochs=80, verbose=1, validation_data=te_batch)

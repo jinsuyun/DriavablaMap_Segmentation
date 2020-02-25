@@ -15,7 +15,7 @@ def Match_(dirs, place):
     return array
 
 
-def LoadData(shuffle=True, batch_size=17500):
+def Load(shuffle=True, batch_size=16):
     trlabel = glob.glob(ds_path + 'drivable_maps/labels/train/*.png')
     telabel = glob.glob(ds_path + 'drivable_maps/labels/val/*.png')
 
@@ -26,18 +26,18 @@ def LoadData(shuffle=True, batch_size=17500):
     trimg = Match_(trlabel, 'train')
     teimg = Match_(telabel, 'val')
 
-    tr_batch = BatchGenerator(trimg, trlabel, batch_size)
-    te_batch = BatchGenerator(teimg, telabel, batch_size)
+    tr_batch = BatchGenerator_(trimg, trlabel, batch_size)
+    te_batch = BatchGenerator_(teimg, telabel, batch_size // 4)
 
     return tr_batch, te_batch
 
 
-class BatchGenerator(Sequence):
+class BatchGenerator_(Sequence):
     def __init__(self, img, label, batch):
         self.img, self.label, self.batch = img, label, batch
 
     def __len__(self):
-        return int(np.floor(len(self.img) / float(self.batch)))
+        return int(np.floor(len(self.img) / (len(self.img) / float(self.batch))))
 
     @staticmethod
     def LoadImg_(dirs, div):
@@ -49,6 +49,7 @@ class BatchGenerator(Sequence):
                 cv.waitKey(1)
                 img = img / 255
             array.append(img)
+        cv.destroyAllWindows()
         return np.array(array)
 
     def __getitem__(self, index):

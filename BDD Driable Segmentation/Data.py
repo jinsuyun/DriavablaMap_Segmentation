@@ -14,8 +14,8 @@ def Load(shuffle=True, batch_size=16):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size)
-    te_batch = BatchGenerator_('val', telabel, batch_size // 4)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, True)
+    te_batch = BatchGenerator_('val', telabel, batch_size, False)
 
     return tr_batch, te_batch
 
@@ -61,14 +61,15 @@ class BatchGenerator_(Sequence):
             img = cv.imread(img_dir, cv.IMREAD_REDUCED_COLOR_4)
             label = cv.imread(label_dir, cv.IMREAD_REDUCED_COLOR_4)
 
-            img, label = self.Augmentation_(img, label, 10)
+            if self.aug:
+                img, label = self.Augmentation_(img, label, 10)
 
             img_array.append(img)
             label_array.append(label)
         return np.array(img_array), np.array(label_array)
 
-    def __init__(self, place, label, batch):
-        self.place, self.label, self.batch = place, label, batch
+    def __init__(self, place, label, batch, aug):
+        self.place, self.label, self.batch, self.aug = place, label, batch, aug
 
     def __len__(self):
         return int(np.floor(len(self.label) / float(self.batch)))

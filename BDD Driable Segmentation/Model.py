@@ -2,6 +2,8 @@ from tensorflow.keras import layers as L
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras import Input, Model
 from tensorflow.keras.optimizers import Adam
+import glob
+import os
 
 
 def Loss(y_true, y_pred):
@@ -20,6 +22,17 @@ def Upsampling_block(input1, input2):
     x = L.UpSampling2D()(input1)
     x = L.Add()([x, y])
     return x
+
+
+def LoadSavedModel():
+    models = glob.glob('D:/Model/*.h5')
+    if len(models):
+        latest = max(models, key=os.path.getctime).replace('\\', '/')
+        print('Loaded ' + str(latest))
+        return 1, latest
+    else:
+        print('Model Not Founded.')
+        return 0, None
 
 
 def Build():
@@ -50,4 +63,7 @@ def Build():
     model = Model(tensor, e)
     model.summary()
     model.compile(Adam(epsilon=0.001), Loss, ['acc'])
+    exist, filepath = LoadSavedModel()
+    if exist:
+        model.load_weights(filepath)
     return model

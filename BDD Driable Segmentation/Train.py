@@ -2,7 +2,7 @@ from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
 import Data
 import Model
 
-path = 'D:/Saved Model/'
+path = 'D:/Model/'
 
 callback = [
     ReduceLROnPlateau(factor=0.2, patience=6, verbose=1),
@@ -12,4 +12,4 @@ callback = [
 tr_batch, te_batch = Data.Load()
 
 model = Model.Build()
-model.fit(tr_batch, epochs=80, verbose=1, validation_data=te_batch)
+model.fit(tr_batch, epochs=80, verbose=1, callbacks=callback, validation_data=te_batch)

@@ -28,6 +28,7 @@ class BatchGenerator_(Sequence):
             identity = path.split('\\')[-1].split('_')[0] + '.jpg'
             path = ds_path + 'images/100k/' + place + '/' + identity
             array.append(path)
+        print(dirs[:2], array[:2])
         return array
 
     @staticmethod
@@ -70,11 +71,15 @@ class BatchGenerator_(Sequence):
 
     def __init__(self, place, label, batch, aug):
         self.place, self.label, self.batch, self.aug = place, label, batch, aug
+        self.process = 0
 
     def __len__(self):
         return int(np.floor(len(self.label) / float(self.batch)))
 
     def __getitem__(self, index):
+        self.process += 1
+        if self.process % 100 == 0:
+            print('Training..', self.process)
         self.img = self.Match_(self.label, self.place)
         self.img_batch = self.img[index * self.batch: (index + 1) * self.batch]
         self.label_batch = self.label[index * self.batch: (index + 1) * self.batch]

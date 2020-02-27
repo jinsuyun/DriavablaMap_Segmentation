@@ -37,25 +37,30 @@ def LoadSavedModel():
 
 def Build():
     tensor = Input([180, 320, 3])
-    ch = 8
+    ch = 32
 
     d1 = Conv_block(tensor, ch)
     d1 = Conv_block(d1, ch)
-    m = L.MaxPool2D()(d1)
+    d1 = Conv_block(d1, ch)
 
+    m = L.MaxPool2D()(d1)
     d2 = Conv_block(m, ch * 2)
     d2 = Conv_block(d2, ch * 2)
-    m = L.MaxPool2D()(d2)
+    d2 = Conv_block(d2, ch * 2)
 
+    m = L.MaxPool2D()(d2)
     e = Conv_block(m, ch * 4)
+    e = Conv_block(e, ch * 4)
     e = Conv_block(e, ch * 4)
     m = Upsampling_block(e, d2)
 
     u2 = Conv_block(m, ch * 2)
     u2 = Conv_block(u2, ch * 2)
+    u2 = Conv_block(u2, ch * 2)
     m = Upsampling_block(u2, d1)
 
     u1 = Conv_block(m, ch)
+    u1 = Conv_block(u1, ch)
     u1 = Conv_block(u1, ch)
 
     e = Conv_block(u1, 3)
@@ -65,5 +70,10 @@ def Build():
     model.compile(Adam(epsilon=0.001), Loss, ['acc'])
     exist, filepath = LoadSavedModel()
     if exist:
-        model.load_weights(filepath)
+        while 1:
+            ans = input('Load? (y/n)')
+            if ans == 'y':
+                model.load_weights(filepath)
+            else:
+                break
     return model

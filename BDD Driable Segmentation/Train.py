@@ -12,4 +12,4 @@ callback = [
 tr_batch, te_batch = Data.Load()
 
 model = Model.Build()
-model.fit(tr_batch, epochs=80, verbose=1, callbacks=callback, validation_data=te_batch)
+model.fit(tr_batch, epochs=80, verbose=2, callbacks=callback, validation_data=te_batch)

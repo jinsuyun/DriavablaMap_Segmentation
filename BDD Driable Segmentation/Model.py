@@ -7,13 +7,16 @@ import os
 
 
 def Loss(y_true, y_pred):
-    return categorical_crossentropy(y_true, y_pred, True, 0.1)
+    return categorical_crossentropy(y_true, y_pred, True)
 
 
-def Conv_block(input, filter, kernel=3):
+def Conv_block(input, filter, kernel=3, last=False):
     x = L.Conv2D(filter, kernel, padding='same')(input)
     x = L.BatchNormalization()(x)
-    x = L.ReLU()(x)
+    if last:
+        x = L.Softmax()(x)
+    else:
+        x = L.ReLU()(x)
     return x
 
 
@@ -41,29 +44,24 @@ def Build():
 
     d1 = Conv_block(tensor, ch)
     d1 = Conv_block(d1, ch)
-    d1 = Conv_block(d1, ch)
 
     m = L.MaxPool2D()(d1)
     d2 = Conv_block(m, ch * 2)
-    d2 = Conv_block(d2, ch * 2)
     d2 = Conv_block(d2, ch * 2)
 
     m = L.MaxPool2D()(d2)
     e = Conv_block(m, ch * 4)
     e = Conv_block(e, ch * 4)
-    e = Conv_block(e, ch * 4)
     m = Upsampling_block(e, d2)
 
     u2 = Conv_block(m, ch * 2)
-    u2 = Conv_block(u2, ch * 2)
     u2 = Conv_block(u2, ch * 2)
     m = Upsampling_block(u2, d1)
 
     u1 = Conv_block(m, ch)
     u1 = Conv_block(u1, ch)
-    u1 = Conv_block(u1, ch)
 
-    e = Conv_block(u1, 3)
+    e = Conv_block(u1, 3, last=True)
 
     model = Model(tensor, e)
     model.summary()
@@ -71,9 +69,10 @@ def Build():
     exist, filepath = LoadSavedModel()
     if exist:
         while 1:
-            ans = input('Load? (y/n)')
-            if ans == 'y':
-                model.load_weights(filepath)
+            ans = input('Load? ([y]/n)')
+            if ans == 'n':
+                break
             else:
+                model.load_weights(filepath)
                 break
     return model

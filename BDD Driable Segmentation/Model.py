@@ -7,7 +7,7 @@ import os
 
 
 def Loss(y_true, y_pred):
-    return categorical_crossentropy(y_true, y_pred, True)
+    return categorical_crossentropy(y_true, y_pred)
 
 
 def Conv_block(input, filter, kernel=3, last=False):
@@ -65,14 +65,13 @@ def Build():
 
     model = Model(tensor, e)
     model.summary()
-    model.compile(Adam(epsilon=0.001), Loss, ['acc'])
     exist, filepath = LoadSavedModel()
     if exist:
-        while 1:
-            ans = input('Load? ([y]/n)')
-            if ans == 'n':
-                break
-            else:
-                model.load_weights(filepath)
-                break
+        ans = input('Load? ([y]/n)')
+        if ans == 'n':
+            print('Passed')
+        else:
+            model.load_weights(filepath)
+            print('Loaded Model')
+    model.compile(Adam(epsilon=0.001), Loss, ['acc'])
     return model

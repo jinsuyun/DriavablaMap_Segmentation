@@ -10,10 +10,10 @@ if gpus:
 
 callback = [
     ReduceLROnPlateau(factor=0.2, patience=5, verbose=1),
-    ModelCheckpoint(path + 'model_{val_acc:.3f}_{val_loss:.3f}_{acc:.2f}.h5')
+    ModelCheckpoint(path + 'model_{val_acc:.4f}_{acc:.4f}.h5')
 ]
 
 tr_batch, te_batch = Data.Load()
 
 model = Model.LoadSavedModel()
-model.fit(tr_batch, epochs=10, verbose=1, callbacks=callback, validation_data=te_batch)
+model.fit(tr_batch, epochs=20, verbose=1, callbacks=callback, validation_data=te_batch)

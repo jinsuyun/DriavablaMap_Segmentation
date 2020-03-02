@@ -47,11 +47,11 @@ class BatchGenerator_(Sequence):
             label_array.append(label)
         return np.array(img_array), np.array(label_array)
 
-    def __init__(self, place, label, batch):
-        self.place, self.label, self.batch = place, label, batch
+    def __init__(self, place, label, batch, div=1):
+        self.place, self.label, self.batch, self.div = place, label, batch, div
 
     def __len__(self):
-        return int(np.floor(len(self.label) / float(self.batch)) // 20)
+        return int(np.floor(len(self.label) / float(self.batch)) // self.div)
 
     def __getitem__(self, index):
         self.img = self.Match_(self.label, self.place)

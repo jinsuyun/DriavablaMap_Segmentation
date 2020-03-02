@@ -29,7 +29,7 @@ def Conv_block(input, filter, kernel=3, last=False):
 
 
 def Upsampling_block(input1, input2):
-    y = Conv_block(input2, input1.shape[-1], 1)
+    y = Conv_block(input2, input1.shape[-1], kernel=3)
     x = L.UpSampling2D()(input1)
     x = L.Add()([x, y])
     return x
@@ -85,7 +85,7 @@ def Build():
     e = Conv_block(u1, 3, last=True)
 
     model = Model(tensor, e)
-    model.compile(Adam(epsilon=0.001), loss, [acc])
+    model.compile(Adam(epsilon=1e-5), loss, [acc])
     model.summary()
     return model
 
@@ -108,7 +108,7 @@ def LoadSavedModel():
             return model
         else:
             model.load_weights(filepath)
-            model.compile(Adam(epsilon=0.001), loss, [acc])
+            model.compile(Adam(epsilon=1e-5), loss, [acc])
             print('Loaded Model')
             return model
     else:

@@ -1,15 +1,19 @@
 from tensorflow.keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
+import tensorflow as tf
 import Data
 import Model
 
 path = 'D:/Model/'
+gpus = tf.config.experimental.list_logical_devices('GPUS')
+if gpus:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 
 callback = [
-    ReduceLROnPlateau(factor=0.2, patience=6, verbose=1),
-    ModelCheckpoint(path + 'model_{val_acc:.3f}_{acc:.2f}.h5', verbose=1)
+    ReduceLROnPlateau(factor=0.2, patience=5, verbose=1),
+    ModelCheckpoint(path + 'model_{val_acc:.3f}_{val_loss:.3f}_{acc:.2f}.h5')
 ]
 
 tr_batch, te_batch = Data.Load()
 
-model = Model.Build()
-model.fit(tr_batch, epochs=10, verbose=2, callbacks=callback, validation_data=te_batch)
+model = Model.LoadSavedModel()
+model.fit(tr_batch, epochs=10, verbose=1, callbacks=callback, validation_data=te_batch)

@@ -6,7 +6,7 @@ import glob
 ds_path = 'C:/bdd100k/'
 
 
-def Load(shuffle=True, batch_size=16):
+def Load(shuffle=True, batch_size=8):
     trlabel = glob.glob(ds_path + 'drivable_maps/color_labels/train/*.png')
     telabel = glob.glob(ds_path + 'drivable_maps/color_labels/val/*.png')
 
@@ -14,8 +14,8 @@ def Load(shuffle=True, batch_size=16):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, False)
-    te_batch = BatchGenerator_('val', telabel, batch_size, False)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size)
+    te_batch = BatchGenerator_('val', telabel, batch_size)
 
     return tr_batch, te_batch
 
@@ -30,51 +30,28 @@ class BatchGenerator_(Sequence):
             array.append(path)
         return array
 
-    @staticmethod
-    def Augmentation_(img, label, rotation=10, center=(320, 180)):
-        width, height = center
-
-        Rotate = np.random.rand(1) * rotation
-
-        if np.random.rand(1) > 0.5:
-            Rotate = -Rotate
-
-        if np.random.rand(1) > 0.5:
-            Flip = True
-        else:
-            Flip = False
-
-        if Flip:
-            img = cv.flip(img, 1)
-            label = cv.flip(label, 1)
-
-        M = cv.getRotationMatrix2D((height // 2, width // 2), Rotate, 1)
-        img = cv.warpAffine(img, M, center)
-        label = cv.warpAffine(label, M, center)
-        return img, label
-
     def LoadImg_(self):
         img_array = []
         label_array = []
         for img_dir, label_dir in zip(self.img_batch, self.label_batch):
-            img = cv.imread(img_dir, cv.IMREAD_REDUCED_COLOR_4)
-            label = cv.imread(label_dir, cv.IMREAD_REDUCED_COLOR_4)
+            img = cv.imread(img_dir)
+            label = cv.imread(label_dir)
+
+            img = cv.resize(img, (512, 288))
+            label = cv.resize(label, (512, 288))
 
             img = img / 255
             label = label / 255
-
-            if self.aug:
-                img, label = self.Augmentation_(img, label, 10)
 
             img_array.append(img)
             label_array.append(label)
         return np.array(img_array), np.array(label_array)
 
-    def __init__(self, place, label, batch, aug):
-        self.place, self.label, self.batch, self.aug = place, label, batch, aug
+    def __init__(self, place, label, batch):
+        self.place, self.label, self.batch = place, label, batch
 
     def __len__(self):
-        return int(np.floor(len(self.label) / float(self.batch)))
+        return int(np.floor(len(self.label) / float(self.batch)) // 20)
 
     def __getitem__(self, index):
         self.img = self.Match_(self.label, self.place)

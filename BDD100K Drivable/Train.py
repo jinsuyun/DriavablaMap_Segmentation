@@ -1,3 +1,0 @@
-import Model
-
-Model.Main()

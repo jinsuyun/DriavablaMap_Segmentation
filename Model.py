@@ -82,7 +82,7 @@ def Build():
 
 
 def LoadSavedModel():
-    models_path = glob.glob('D:/Model/*.h5')
+    models_path = glob.glob('./Models/*.h5')
     if len(models_path):
         latest = max(models_path, key=os.path.getctime).replace('\\', '/')
         print('Loaded ' + str(latest))

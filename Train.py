@@ -3,7 +3,7 @@ import tensorflow as tf
 import Data
 import Model
 
-path = 'D:/Model/'
+path = './Models/'
 gpus = tf.config.experimental.list_logical_devices('GPUS')
 if gpus:
     tf.config.experimental.set_memory_growth(gpus[0], True)

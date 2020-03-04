@@ -5,6 +5,7 @@ import Model
 
 model = Model.LoadSavedModel()
 imgs = glob.glob('C:/bdd100k/images/100k/test/*')
+np.random.shuffle(imgs)
 
 for path in imgs[:10]:
     img = cv.imread(path)

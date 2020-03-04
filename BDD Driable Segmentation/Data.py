@@ -14,7 +14,7 @@ def Load(shuffle=True, batch_size=8):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 10)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 5)
     te_batch = BatchGenerator_('val', telabel, batch_size, 5)
 
     return tr_batch, te_batch

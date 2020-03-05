@@ -10,8 +10,8 @@ np.random.shuffle(imgs)
 for path in imgs[:10]:
     img = cv.imread(path)
     img = cv.resize(img, (512, 288))
-    predict = np.reshape(model.predict(np.expand_dims(img, axis=0)), [288, 512, 3])
+    predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255
     predict[:, :, 1] = 0
-    cv.imshow('img', img)
-    cv.imshow('pred', predict)
+    imgpred = cv.add(img, predict, dtype=cv.CV_8U)
+    cv.imshow('pred', imgpred)
     cv.waitKey(5000)

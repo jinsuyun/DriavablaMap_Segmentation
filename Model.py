@@ -29,51 +29,73 @@ def Conv_block(input, filter, kernel=3, last=False):
     return x
 
 
-def Upsampling_block(input1, input2):
-    y = Conv_block(input2, input1.shape[-1], kernel=1)
-    x = L.UpSampling2D()(input1)
+def BN_Softmax(input):
+    x = L.BatchNormalization()(input)
+    x = L.Softmax()(x)
+    return x
+
+
+def Conv_layer(input, filter):
+    x = L.Conv2D(filter, 3, padding='same')(input)
+    return x
+
+
+def Trans_layer(input1, input2):
+    x = Conv_layer(L.UpSampling2D()(input1), input2.shape[-1])
+    x = BN_ReLU(x)
+    y = Conv_layer(input2, input2.shape[-1])
+    y = BN_ReLU(y)
     x = L.Add()([x, y])
     return x
 
 
 def Build():
     tensor = Input([288, 512, 3])
-    ch = 32
+    ch = 16
 
-    d1 = Conv_block(tensor, ch)
+    d = Conv_layer(tensor, ch)
+    d = BN_ReLU(d)
 
-    m = L.MaxPool2D()(d1)
-    d2 = Conv_block(m, ch * 2)
+    d1 = Conv_layer(d, ch * 2)
+    d1 = BN_ReLU(d1)
 
-    m = L.MaxPool2D()(d2)
-    d3 = Conv_block(m, ch * 4)
+    m = Pool_layer(d1)
+    d2 = Conv_layer(m, ch * 4)
+    d2 = BN_ReLU(d2)
 
-    m = L.MaxPool2D()(d3)
-    d4 = Conv_block(m, ch * 6)
+    m = Pool_layer(d2)
+    d3 = Conv_layer(m, ch * 6)
+    d3 = BN_ReLU(d3)
 
-    m = L.MaxPool2D()(d4)
-    d5 = Conv_block(m, ch * 8)
+    m = Pool_layer(d3)
+    d4 = Conv_layer(m, ch * 8)
+    d4 = BN_ReLU(d4)
 
-    m = L.MaxPool2D()(d5)
-    e = Conv_block(m, ch * 10)
-    e = Conv_block(e, ch * 10)
-    m = Upsampling_block(e, d5)
+    m = Pool_layer(d4)
+    d5 = Conv_layer(m, ch * 10)
+    d5 = BN_ReLU(d5)
+    m = Trans_layer(d5, d4)
 
-    u5 = Conv_block(m, ch * 8)
-    m = Upsampling_block(u5, d4)
+    d4 = Conv_layer(m, ch * 8)
+    d4 = BN_ReLU(d4)
+    m = Trans_layer(d4, d3)
 
-    u4 = Conv_block(m, ch * 6)
-    m = Upsampling_block(u4, d3)
+    d3 = Conv_layer(m, ch * 6)
+    d3 = BN_ReLU(d3)
+    m = Trans_layer(d3, d2)
 
-    u3 = Conv_block(m, ch * 4)
-    m = Upsampling_block(u3, d2)
+    d2 = Conv_layer(m, ch * 4)
+    d2 = BN_ReLU(d2)
+    m = Trans_layer(d2, d1)
 
-    u2 = Conv_block(m, ch * 2)
-    m = Upsampling_block(u2, d1)
+    d1 = Conv_layer(m, ch * 2)
+    d1 = BN_ReLU(d1)
 
-    u1 = Conv_block(m, ch)
+    d = Conv_layer(d1, ch)
+    d = BN_ReLU(d)
 
-    e = Conv_block(u1, 3, kernel=1, last=True)
+    e = Conv_layer(d, 3)
+    e = BN_Softmax(e)
 
     model = Model(tensor, e)
     model.compile(Adam(epsilon=1e-5), iou_loss, [iou_acc])
@@ -82,7 +104,7 @@ def Build():
 
 
 def LoadSavedModel():
-    models_path = glob.glob('./Models/*.h5')
+    models_path = glob.glob('D:/Models/*.h5')
     if len(models_path):
         latest = max(models_path, key=os.path.getctime).replace('\\', '/')
         print('Loaded ' + str(latest))

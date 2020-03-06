@@ -14,8 +14,8 @@ def Load(shuffle=True, batch_size=8):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 2)
-    te_batch = BatchGenerator_('val', telabel, batch_size, 2)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size)
+    te_batch = BatchGenerator_('val', telabel, batch_size)
 
     return tr_batch, te_batch
 
@@ -61,4 +61,5 @@ class BatchGenerator_(Sequence):
         return img_batch, label_batch
 
     def on_epoch_end(self):
+        # Tensorflow 버그로 작동 안함
         np.random.shuffle(self.label)

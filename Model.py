@@ -19,13 +19,9 @@ def iou_loss(y_true, y_pred, smooth=1):
     return 1 - iou_acc(y_true, y_pred, smooth)
 
 
-def Conv_block(input, filter, kernel=3, last=False):
-    x = L.Conv2D(filter, kernel, padding='same')(input)
-    x = L.BatchNormalization()(x)
-    if last:
-        x = L.Softmax()(x)
-    else:
-        x = L.ReLU()(x)
+def BN_ReLU(input):
+    x = L.BatchNormalization()(input)
+    x = L.ReLU()(x)
     return x
 
 
@@ -46,6 +42,11 @@ def Trans_layer(input1, input2):
     y = Conv_layer(input2, input2.shape[-1])
     y = BN_ReLU(y)
     x = L.Add()([x, y])
+    return x
+
+
+def Pool_layer(input):
+    x = L.MaxPool2D()(input)
     return x
 
 
@@ -98,7 +99,7 @@ def Build():
     e = BN_Softmax(e)
 
     model = Model(tensor, e)
-    model.compile(Adam(epsilon=1e-5), iou_loss, [iou_acc])
+    model.compile(Adam(learning_rate=5e-3, epsilon=2e-7), iou_loss, [iou_acc])
     model.summary()
     return model
 

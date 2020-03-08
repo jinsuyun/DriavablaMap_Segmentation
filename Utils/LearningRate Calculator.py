@@ -8,5 +8,5 @@ def scheduler(epoch, threshold=5):
         return lr / (epoch - threshold)
 
 
-for i in range(20):
+for i in range(50):
     print(i + 1, scheduler(i))

@@ -11,8 +11,9 @@ if gpus:
 lr = 1e-2
 
 
-def scheduler(epoch, threshold=5):
-    if epoch < threshold:
+def scheduler(epoch):
+    threshold = 5
+    if epoch <= threshold:
         return lr
     else:
         return lr / (epoch - threshold)

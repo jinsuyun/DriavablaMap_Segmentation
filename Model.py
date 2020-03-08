@@ -22,6 +22,7 @@ def iou_loss(y_true, y_pred, smooth=1):
 def BN_ReLU(input):
     x = L.BatchNormalization()(input)
     x = L.ReLU()(x)
+    x = L.Dropout(0.2)(x)
     return x
 
 
@@ -37,9 +38,8 @@ def Conv_layer(input, filter):
 
 
 def Trans_layer(input1, input2):
-    x = Conv_layer(L.UpSampling2D()(input1), input2.shape[-1])
-    x = BN_ReLU(x)
-    y = Conv_layer(input2, input2.shape[-1])
+    x = L.UpSampling2D()(input1)
+    y = Conv_layer(input2, input1.shape[-1])
     y = BN_ReLU(y)
     x = L.Add()([x, y])
     return x
@@ -50,7 +50,7 @@ def Pool_layer(input):
     return x
 
 
-def Build():
+def Build(lr):
     tensor = Input([288, 512, 3])
     ch = 16
 
@@ -99,12 +99,12 @@ def Build():
     e = BN_Softmax(e)
 
     model = Model(tensor, e)
-    model.compile(Adam(learning_rate=5e-3, epsilon=2e-7), iou_loss, [iou_acc])
+    model.compile(Adam(learning_rate=lr), iou_loss, [iou_acc])
     model.summary()
     return model
 
 
-def LoadSavedModel():
+def LoadSavedModel(lr=1e-2):
     models_path = glob.glob('D:/Models/*.h5')
     if len(models_path):
         latest = max(models_path, key=os.path.getctime).replace('\\', '/')
@@ -117,13 +117,14 @@ def LoadSavedModel():
     if exist:
         ans = input('Load? ([y]/n)')
         if ans == 'n':
-            model = Build()
+            model = Build(lr)
             print('Passed')
-            return model
+            return model, 0
         else:
             model = models.load_model(filepath, {'iou_loss': iou_loss, 'iou_acc': iou_acc})
-            print('Loaded Model')
-            return model
+            epoch = filepath.split('-')[0].split('_')[-1]
+            print('Loaded Model', epoch)
+            return model, int(epoch)
     else:
-        model = Build()
-        return model
+        model = Build(lr)
+        return model, 0

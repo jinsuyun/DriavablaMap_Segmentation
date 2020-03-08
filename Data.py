@@ -14,7 +14,7 @@ def Load(shuffle=True, batch_size=8):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 2)
     te_batch = BatchGenerator_('val', telabel, batch_size)
 
     return tr_batch, te_batch
@@ -49,12 +49,12 @@ class BatchGenerator_(Sequence):
 
     def __init__(self, place, label, batch, div=1):
         self.place, self.label, self.batch, self.div = place, label, batch, div
+        self.img = self.Match_(self.label, self.place)
 
     def __len__(self):
-        return int(np.floor(len(self.label) / float(self.batch)) // self.div)
+        return int(np.floor(len(self.label) / self.div / float(self.batch)))
 
     def __getitem__(self, index):
-        self.img = self.Match_(self.label, self.place)
         self.img_batch = self.img[index * self.batch: (index + 1) * self.batch]
         self.label_batch = self.label[index * self.batch: (index + 1) * self.batch]
         img_batch, label_batch = self.LoadImg_()

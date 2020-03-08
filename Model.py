@@ -50,7 +50,7 @@ def Pool_layer(input):
     return x
 
 
-def Build(lr):
+def Build(lr=1e-2):
     tensor = Input([288, 512, 3])
     ch = 16
 

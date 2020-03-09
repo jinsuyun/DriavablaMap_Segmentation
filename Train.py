@@ -12,7 +12,7 @@ lr = 1e-2
 
 
 def scheduler(epoch):
-    threshold = 12
+    threshold = 15
     repeat = 3
     if epoch <= threshold:
         return lr

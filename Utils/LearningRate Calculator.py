@@ -1,11 +1,14 @@
 lr = 1e-2
 
 
-def scheduler(epoch, threshold=20):
+def scheduler(epoch):
+    threshold = 15
+    repeat = 2
     if epoch <= threshold:
         return lr
     else:
-        return lr / (epoch - threshold)
+        diff = epoch - threshold
+        return min(lr / (diff / repeat), lr)
 
 
 for i in range(50):

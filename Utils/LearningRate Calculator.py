@@ -12,4 +12,4 @@ def scheduler(epoch):
 
 
 for i in range(50):
-    print(i + 1, scheduler(i))
+    print('{:02d}'.format(i + 1), scheduler(i))

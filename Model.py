@@ -22,24 +22,22 @@ def iou_loss(y_true, y_pred, smooth=1):
 def BN_ReLU(input):
     x = L.BatchNormalization()(input)
     x = L.ReLU()(x)
-    x = L.Dropout(0.2)(x)
     return x
 
 
-def BN_Softmax(input):
-    x = L.BatchNormalization()(input)
-    x = L.Softmax()(x)
+def Softmax(input):
+    x = L.Softmax()(input)
     return x
 
 
-def Conv_layer(input, filter):
-    x = L.Conv2D(filter, 3, padding='same')(input)
+def Conv_layer(input, filter, kernel=3):
+    x = L.Conv2D(filter, kernel, padding='same')(input)
     return x
 
 
 def Trans_layer(input1, input2):
     x = L.UpSampling2D()(input1)
-    y = Conv_layer(input2, input1.shape[-1])
+    y = Conv_layer(input2, input1.shape[-1], kernel=1)
     y = BN_ReLU(y)
     x = L.Add()([x, y])
     return x
@@ -54,51 +52,78 @@ def Build(lr=1e-2):
     tensor = Input([288, 512, 3])
     ch = 16
 
-    d = Conv_layer(tensor, ch)
-    d = BN_ReLU(d)
-
-    d1 = Conv_layer(d, ch * 2)
+    d1 = Conv_layer(tensor, ch)
+    d1 = BN_ReLU(d1)
+    d1 = Conv_layer(d1, ch)
+    d1 = BN_ReLU(d1)
+    d1 = Conv_layer(d1, ch)
     d1 = BN_ReLU(d1)
 
     m = Pool_layer(d1)
-    d2 = Conv_layer(m, ch * 4)
+    d2 = Conv_layer(m, ch * 2)
+    d2 = BN_ReLU(d2)
+    d2 = Conv_layer(d2, ch * 2)
+    d2 = BN_ReLU(d2)
+    d2 = Conv_layer(d2, ch * 2)
     d2 = BN_ReLU(d2)
 
     m = Pool_layer(d2)
-    d3 = Conv_layer(m, ch * 6)
+    d3 = Conv_layer(m, ch * 4)
+    d3 = BN_ReLU(d3)
+    d3 = Conv_layer(d3, ch * 4)
+    d3 = BN_ReLU(d3)
+    d3 = Conv_layer(d3, ch * 4)
     d3 = BN_ReLU(d3)
 
     m = Pool_layer(d3)
-    d4 = Conv_layer(m, ch * 8)
+    d4 = Conv_layer(m, ch * 6)
+    d4 = BN_ReLU(d4)
+    d4 = Conv_layer(d4, ch * 6)
+    d4 = BN_ReLU(d4)
+    d4 = Conv_layer(d4, ch * 6)
     d4 = BN_ReLU(d4)
 
     m = Pool_layer(d4)
-    d5 = Conv_layer(m, ch * 10)
+    d5 = Conv_layer(m, ch * 8)
+    d5 = BN_ReLU(d5)
+    d5 = Conv_layer(d5, ch * 8)
+    d5 = BN_ReLU(d5)
+    d5 = Conv_layer(d5, ch * 8)
     d5 = BN_ReLU(d5)
     m = Trans_layer(d5, d4)
 
-    d4 = Conv_layer(m, ch * 8)
+    d4 = Conv_layer(m, ch * 6)
+    d4 = BN_ReLU(d4)
+    d4 = Conv_layer(d4, ch * 6)
+    d4 = BN_ReLU(d4)
+    d4 = Conv_layer(d4, ch * 6)
     d4 = BN_ReLU(d4)
     m = Trans_layer(d4, d3)
 
-    d3 = Conv_layer(m, ch * 6)
+    d3 = Conv_layer(m, ch * 4)
+    d3 = BN_ReLU(d3)
+    d3 = Conv_layer(d3, ch * 4)
+    d3 = BN_ReLU(d3)
+    d3 = Conv_layer(d3, ch * 4)
     d3 = BN_ReLU(d3)
     m = Trans_layer(d3, d2)
 
-    d2 = Conv_layer(m, ch * 4)
+    d2 = Conv_layer(m, ch * 2)
+    d2 = BN_ReLU(d2)
+    d2 = Conv_layer(d2, ch * 2)
+    d2 = BN_ReLU(d2)
+    d2 = Conv_layer(d2, ch * 2)
     d2 = BN_ReLU(d2)
     m = Trans_layer(d2, d1)
 
-    d1 = Conv_layer(m, ch * 2)
+    d1 = Conv_layer(m, ch)
     d1 = BN_ReLU(d1)
+    d1 = Conv_layer(d1, ch)
+    d1 = BN_ReLU(d1)
+    d1 = Conv_layer(d1, 3, kernel=1)
+    d1 = Softmax(d1)
 
-    d = Conv_layer(d1, ch)
-    d = BN_ReLU(d)
-
-    e = Conv_layer(d, 3)
-    e = BN_Softmax(e)
-
-    model = Model(tensor, e)
+    model = Model(tensor, d1)
     model.compile(Adam(learning_rate=lr), iou_loss, [iou_acc])
     model.summary()
     return model

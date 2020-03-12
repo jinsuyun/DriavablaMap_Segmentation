@@ -1,14 +1,14 @@
 # DrivableMap-Segmentation
 
-*Dataset link-  
+* Dataset link-  
 https://bdd-data.berkeley.edu/
 
 
-*Input and Output shape-  
+* Input and Output shape-  
 width: 512, height: 288
 
 
-*label meaning-  
+* label meaning-  
 0.Alternative route  1.Background  2.Current route
 
 Samples

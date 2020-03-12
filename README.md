@@ -9,7 +9,7 @@ width: 512, height: 288
 
 
 * **label meaning**  
-0. *Alternative route*  1. *Background*  2. *Current route*
+0.*Alternative route* 1.*Background* 2.*Current route*
 
 Samples
 --------

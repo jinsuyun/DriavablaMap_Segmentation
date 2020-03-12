@@ -8,14 +8,14 @@ gpus = tf.config.experimental.list_logical_devices('GPUS')
 if gpus:
     tf.config.experimental.set_memory_growth(gpus[0], True)
 
-lr = 3e-4
+lr = 2e-4
 
 
 def scheduler(epoch):
     warmup = 5
     warmup_lr = 1e-5
-    threshold = 30
-    lr2 = 1e-4
+    threshold = 25
+    lr2 = 5e-5
     if epoch < warmup:
         return warmup_lr
     elif epoch < threshold:

@@ -14,8 +14,8 @@ def Load(shuffle=True, batch_size=8):
         np.random.shuffle(trlabel)
         np.random.shuffle(telabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 8)
-    te_batch = BatchGenerator_('val', telabel, batch_size, 8)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 12)
+    te_batch = BatchGenerator_('val', telabel, batch_size, 10)
 
     return tr_batch, te_batch
 
@@ -42,6 +42,8 @@ class BatchGenerator_(Sequence):
 
             img = img / 255
             label = label / 255
+
+            label[(label[:, :, 0] == 0) & (label[:, :, 2] == 0)] = [0, 1, 0]
 
             img_array.append(img)
             label_array.append(label)

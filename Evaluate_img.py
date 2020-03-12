@@ -6,7 +6,7 @@ import Model
 model, epoch = Model.LoadSavedModel(answer='\n')
 imgs = glob.glob('C:/bdd100k/images/100k/test/*')
 np.random.shuffle(imgs)
-threshold = 0.7
+threshold = 0.8
 
 for path in imgs[:10]:
     img = cv.imread(path)

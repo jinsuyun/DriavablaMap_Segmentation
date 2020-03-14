@@ -18,4 +18,4 @@ width: 512, height: 288
 * Mask  
 ![Mask](https://user-images.githubusercontent.com/52787702/76678227-613fad00-6619-11ea-946b-a7cb561b8fc2.gif)
 * Lane  
-![Lane](https://user-images.githubusercontent.com/52787702/76678229-67358e00-6619-11ea-89cd-f5693324654e.gif)
+![Lane](https://user-images.githubusercontent.com/52787702/76678485-cbf1e800-661b-11ea-98b9-7e2df1577ce8.gif)

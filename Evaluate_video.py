@@ -19,14 +19,14 @@ while vid.isOpened():
     load, image = vid.read()
     if load:
         img = cv.resize(image, (512, 288))
-        img = cv.GaussianBlur(img, (3, 3), 2)
-        predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255
+        blur_img = cv.GaussianBlur(img, (3, 3), 2)  # if you want faint output, change 'blur_img' to 'img'
+        predict = np.reshape(model.predict(np.expand_dims(blur_img, axis=0) / 255), [288, 512, 3]) * 255
         predict[predict < (255 * threshold)] = 0
         predict[:, :, 1] = 0
         imgpred = cv.add(img, predict, dtype=cv.CV_8U)
 
         lane_mask = cv.cvtColor(predict, cv.COLOR_BGR2GRAY).astype(np.uint8)
-        kernel = np.ones([8, 8]) / 64
+        kernel = np.ones([10, 10]) / 100
         lane_mask = cv.filter2D(lane_mask, -1, kernel)
         img[lane_mask == 0] = 0
 

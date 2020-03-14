@@ -5,12 +5,14 @@ import Model
 video_path = 'D:/20200124_164253.mp4'
 result_save1 = 'D:/Predict.mp4'
 result_save2 = 'D:/Mask.mp4'
+result_save3 = 'D:/Lane.mp4'
 model, epoch = Model.LoadSavedModel(answer='\n')
 vid = cv.VideoCapture(video_path)
 
 codec = cv.VideoWriter_fourcc(*'mp4v')
 result1 = cv.VideoWriter(result_save1, codec, 30, (512, 288), True)
 result2 = cv.VideoWriter(result_save2, codec, 30, (512, 288), False)
+result3 = cv.VideoWriter(result_save3, codec, 30, (512, 288), True)
 
 threshold = 0.8
 while vid.isOpened():
@@ -22,18 +24,18 @@ while vid.isOpened():
         predict[:, :, 1] = 0
         imgpred = cv.add(img, predict, dtype=cv.CV_8U)
 
-        lane_mask = cv.cvtColor(predict, cv.COLOR_BGR2GRAY)
+        lane_mask = cv.cvtColor(predict, cv.COLOR_BGR2GRAY).astype(np.uint8)
         kernel = np.ones([8, 8]) / 64
         lane_mask = cv.filter2D(lane_mask, -1, kernel)
         img[lane_mask == 0] = 0
-        blur_img = cv.GaussianBlur(img, (3, 3), 0)
-        gray_img = cv.cvtColor(blur_img, cv.COLOR_BGR2GRAY)
 
         result1.write(imgpred)
-        result2.write(gray_img)
+        result2.write(lane_mask)
+        result3.write(img)
         cv.imshow('imgpred', imgpred)
-        cv.imshow('mask img', gray_img)
-        cv.waitKey(100)
+        cv.imshow('mask', lane_mask)
+        cv.imshow('lane', img)
+        cv.waitKey(50)
     else:
         break
 
@@ -44,3 +46,4 @@ print('finished. Please check result on', filepath)
 vid.release()
 result1.release()
 result2.release()
+result3.release()

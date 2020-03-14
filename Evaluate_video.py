@@ -19,6 +19,7 @@ while vid.isOpened():
     load, image = vid.read()
     if load:
         img = cv.resize(image, (512, 288))
+        img = cv.GaussianBlur(img, (3, 3), 2)
         predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255
         predict[predict < (255 * threshold)] = 0
         predict[:, :, 1] = 0
@@ -35,7 +36,9 @@ while vid.isOpened():
         cv.imshow('imgpred', imgpred)
         cv.imshow('mask', lane_mask)
         cv.imshow('lane', img)
-        cv.waitKey(50)
+        key = cv.waitKey(50)
+        if key == 27:
+            break
     else:
         break
 

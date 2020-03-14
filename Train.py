@@ -18,6 +18,8 @@ def scheduler(epoch):
     lr2 = 5e-5
     if epoch < warmup:
         return warmup_lr
+    elif epoch == warmup:
+        return (lr + warmup_lr) / 2
     elif epoch < threshold:
         return lr
     else:

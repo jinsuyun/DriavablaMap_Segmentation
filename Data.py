@@ -40,7 +40,7 @@ class BatchGenerator_(Sequence):
             img = cv.resize(img, (512, 288))
             label = cv.resize(label, (512, 288))
 
-            img = cv.GaussianBlur(img, (3, 3), 2)
+            # img = cv.GaussianBlur(img, (3, 3), 2)
 
             img = img / 255
             label = label / 255

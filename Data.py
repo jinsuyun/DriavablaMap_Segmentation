@@ -6,18 +6,26 @@ import glob
 ds_path = 'C:/bdd100k/'
 
 
-def Load(shuffle=True, batch_size=8):
+def Load_tr(shuffle=True, batch_size=8):
     trlabel = glob.glob(ds_path + 'drivable_maps/color_labels/train/*.png')
-    telabel = glob.glob(ds_path + 'drivable_maps/color_labels/val/*.png')
 
     if shuffle:
         np.random.shuffle(trlabel)
-        np.random.shuffle(telabel)
 
     tr_batch = BatchGenerator_('train', trlabel, batch_size, 12)
+
+    return tr_batch
+
+
+def Load_te(shuffle=True, batch_size=8):
+    telabel = glob.glob(ds_path + 'drivable_maps/color_labels/val/*.png')
+
+    if shuffle:
+        np.random.shuffle(telabel)
+
     te_batch = BatchGenerator_('val', telabel, batch_size, 10)
 
-    return tr_batch, te_batch
+    return te_batch
 
 
 class BatchGenerator_(Sequence):
@@ -37,10 +45,7 @@ class BatchGenerator_(Sequence):
             img = cv.imread(img_dir)
             label = cv.imread(label_dir)
 
-            img = cv.resize(img, (512, 288))
-            label = cv.resize(label, (512, 288))
-
-            # img = cv.GaussianBlur(img, (3, 3), 2)
+            img = cv.GaussianBlur(img, (3, 3), 0)
 
             img = img / 255
             label = label / 255

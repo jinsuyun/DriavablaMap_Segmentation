@@ -19,7 +19,7 @@ while vid.isOpened():
     load, image = vid.read()
     if load:
         img = cv.resize(image, (512, 288))
-        blur_img = cv.GaussianBlur(img, (3, 3), 2)  # if you want faint output, change 'blur_img' to 'img'
+        blur_img = cv.GaussianBlur(img, (3, 3), 0)  # if you want faint output, change 'blur_img' to 'img'
         predict = np.reshape(model.predict(np.expand_dims(blur_img, axis=0) / 255), [288, 512, 3]) * 255
         predict[predict < (255 * threshold)] = 0
         predict[:, :, 1] = 0

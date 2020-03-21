@@ -32,7 +32,9 @@ callback = [
     TensorBoard('D:/logs/', profile_batch=10000)
 ]
 
-tr_batch, te_batch = Data.Load()
+s = 4
+tr_batch = Data.Load_tr(batch_size=s)
+te_batch = Data.Load_te(batch_size=s)
 
 model, epoch = Model.LoadSavedModel(lr)
 model.fit(tr_batch, epochs=epoch + 1, verbose=1, callbacks=callback, validation_data=te_batch, initial_epoch=epoch)

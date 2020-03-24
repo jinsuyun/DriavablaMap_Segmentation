@@ -12,7 +12,7 @@ def Load_tr(shuffle=True, batch_size=8):
     if shuffle:
         np.random.shuffle(trlabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 40)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 30)
 
     return tr_batch
 

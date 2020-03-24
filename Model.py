@@ -44,7 +44,7 @@ class SegModel:
 
     def up(self, tensor1, tensor2):
         with K.name_scope('up'):
-            x = self.conv_bn_relu(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
+            x = self.conv_bn_relu(L.UpSampling2D()(tensor1), tensor2.shape.as_list()[-1])
             x = self.add(x, tensor2)
             return x
 
@@ -93,6 +93,12 @@ class SegModel:
         d4 = self.conv_bn_relu(m, self.channel * 6)
 
         m = self.down(d4)
+        d5 = self.conv_bn_relu(m, self.channel * 8)
+
+        m = self.down(d5)
+        d6 = self.conv_bn_relu(m, self.channel * 10)
+        m = self.up(d6, d5)
+
         d5 = self.conv_bn_relu(m, self.channel * 8)
         m = self.up(d5, d4)
 

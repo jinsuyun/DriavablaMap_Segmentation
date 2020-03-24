@@ -8,13 +8,12 @@ gpus = tf.config.experimental.list_logical_devices('GPUS')
 if gpus:
     tf.config.experimental.set_memory_growth(gpus[0], True)
 
-lr = 2e-4
-
 
 def scheduler(epoch):
-    warmup = 5
+    warmup = 3
     warmup_lr = 1e-5
     threshold = 25
+    lr = 1e-4
     lr2 = 5e-5
     if epoch < warmup:
         return warmup_lr
@@ -32,9 +31,11 @@ callback = [
     TensorBoard('D:/logs/', profile_batch=10000)
 ]
 
-s = 4
-tr_batch = Data.Load_tr(batch_size=s)
-te_batch = Data.Load_te(batch_size=s)
+b = 4
+tr_batch = Data.Load_tr(batch_size=b)
+te_batch = Data.Load_te(batch_size=b)
 
-model, epoch = Model.LoadSavedModel(lr)
-model.fit(tr_batch, epochs=epoch + 1, verbose=1, callbacks=callback, validation_data=te_batch, initial_epoch=epoch)
+c = 3
+model = Model.SegModel(3)
+model.load()
+model.fit(tr_batch, te_batch, callback)

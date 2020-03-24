@@ -4,7 +4,6 @@ import os
 from tensorflow.keras import Input, Model
 from tensorflow.keras import backend as K
 from tensorflow.keras import layers as L
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import models
 
 
@@ -43,10 +42,10 @@ class SegModel:
             x = L.MaxPool2D()(tensor)
             return x
 
-    def up(self, tensor1, tensor2, ch):
+    def up(self, tensor1, tensor2):
         with K.name_scope('up'):
-            x = self.conv_bn_relu(L.UpSampling2D()(tensor1), ch)
-            x = self.concat(x, tensor2)
+            x = self.conv_bn_relu(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
+            x = self.add(x, tensor2)
             return x
 
     @staticmethod
@@ -57,30 +56,6 @@ class SegModel:
             x = L.ReLU()(x)
             return x
 
-    def gru_relu(self, tensor, direction):
-        with K.name_scope('gru_relu'):
-            h, w, c = K.shape(tensor)[1:]
-            if direction == 'h':
-                tensor = K.reshape(tensor, [-1, w, h * c])
-                a = L.GRU(tensor, activation='relu', return_sequences=True, go_backwards=False)
-                b = L.GRU(tensor, activation='relu', return_sequences=True, go_backwards=True)
-                x = self.add(a, b)
-                x = K.reshape(x, [-1, h, w, c])
-                return x
-            if direction == 'v':
-                tensor = K.reshape(tensor, [-1, h, w * c])
-                a = L.GRU(tensor, activation='relu', return_sequences=True, go_backwards=False)
-                b = L.GRU(tensor, activation='relu', return_sequences=True, go_backwards=True)
-                x = self.add(a, b)
-                x = K.reshape(x, [-1, h, w, c])
-                return x
-
-    def layer_rnn(self, tensor):
-        with K.name_scope('layer_rnn'):
-            x = self.gru_relu(tensor, 'h')
-            x = self.gru_relu(x, 'v')
-            return x
-
     def resnet(self, tensor, ch):
         with K.name_scope('resnet'):
             x = self.conv_bn_relu(tensor, ch)
@@ -89,7 +64,7 @@ class SegModel:
             x = self.add(x, y)
             return x
 
-    def atrous(self, tensor, ch):
+    def deeplab(self, tensor, ch):
         with K.name_scope('atrous'):
             a = self.conv_bn_relu(tensor, ch, (1, 1))
             b = self.conv_bn_relu(tensor, ch, (3, 3))
@@ -103,25 +78,54 @@ class SegModel:
             return x
 
     def build(self):
-        tensor = Input([720, 1280, 3])
+        tensor = Input([288, 512, 3])
 
         d1 = self.conv_bn_relu(tensor, self.channel)
-        d1 = self.layer_rnn(d1)
+        d1 = self.conv_bn_relu(d1, self.channel)
 
-        d2 = self.conv_bn_relu(d1, self.channel)
-        d2 = self.layer_rnn(d2)
+        m = self.down(d1)
+        d2 = self.conv_bn_relu(m, self.channel * 2)
 
-        e = self.last_conv(d2)
+        m = self.down(d2)
+        d3 = self.conv_bn_relu(m, self.channel * 4)
+
+        m = self.down(d3)
+        d4 = self.conv_bn_relu(m, self.channel * 6)
+
+        m = self.down(d4)
+        d5 = self.conv_bn_relu(m, self.channel * 8)
+        m = self.up(d5, d4)
+
+        d4 = self.conv_bn_relu(m, self.channel * 6)
+        m = self.up(d4, d3)
+
+        d3 = self.conv_bn_relu(m, self.channel * 4)
+        m = self.up(d3, d2)
+
+        d2 = self.conv_bn_relu(m, self.channel * 2)
+        m = self.up(d2, d1)
+
+        d1 = self.conv_bn_relu(m, self.channel)
+        d1 = self.conv_bn_relu(d1, self.channel)
+
+        e = self.last_conv(d1)
 
         self.model = Model(tensor, e)
         self.model.compile('adam', iou_loss, [iou_acc])
         self.model.summary()
 
+    def fit(self, tr_batch, te_batch, callback):
+        self.model.fit(tr_batch, validation_data=te_batch, callbacks=callback,
+                       epochs=self.epoch + 1, initial_epoch=self.epoch)
+
+    def predict(self, img):
+        return self.model.predict(img)
+
     def load(self, answer=None):
         models_path = glob.glob('D:/Models/*.h5')
         if len(models_path):
             latest = max(models_path, key=os.path.getctime).replace('\\', '/')
-            print('Loaded ' + str(latest))
+            print('Found ' + str(latest))
             exist, filepath = 1, latest
         else:
             print('Model Not Founded.')
@@ -138,12 +142,19 @@ class SegModel:
                 if ans == 'n':
                     self.build()
                     print('Passed')
+                    break
                 elif len(ans.replace('\n', '')) == 0 or ans == 'y':
                     self.model = models.load_model(filepath, {'iou_loss': iou_loss, 'iou_acc': iou_acc})
-                    self.epoch = filepath.split('-')[0].split('_')[-1]
+                    self.epoch = int(filepath.split('-')[0].split('_')[-1])
                     print('Loaded Model', self.epoch)
+                    break
                 else:
                     print('\033[35m' + ans + '\033[0m', 'is invalid. Please type again.')
                     continue
         else:
             self.build()
+
+
+if __name__ == '__main__':
+    model = SegModel(3)
+    model.load()

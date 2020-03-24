@@ -6,7 +6,8 @@ video_path = 'D:/20200124_164253.mp4'
 result_save1 = 'D:/Predict.mp4'
 result_save2 = 'D:/Mask.mp4'
 result_save3 = 'D:/Lane.mp4'
-model, epoch = Model.LoadSavedModel(answer='\n')
+model = Model.SegModel(3)
+model.load('\n')
 vid = cv.VideoCapture(video_path)
 
 codec = cv.VideoWriter_fourcc(*'mp4v')
@@ -19,8 +20,9 @@ while vid.isOpened():
     load, image = vid.read()
     if load:
         img = cv.resize(image, (512, 288))
-        blur_img = cv.GaussianBlur(img, (3, 3), 0)  # if you want faint output, change 'blur_img' to 'img'
-        predict = np.reshape(model.predict(np.expand_dims(blur_img, axis=0) / 255), [288, 512, 3]) * 255
+        # blur_img = cv.GaussianBlur(img, (3, 3), 0)
+
+        predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255
         predict[predict < (255 * threshold)] = 0
         predict[:, :, 1] = 0
         imgpred = cv.add(img, predict, dtype=cv.CV_8U)

@@ -12,7 +12,7 @@ def Load_tr(shuffle=True, batch_size=8):
     if shuffle:
         np.random.shuffle(trlabel)
 
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 12)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 40)
 
     return tr_batch
 
@@ -23,7 +23,7 @@ def Load_te(shuffle=True, batch_size=8):
     if shuffle:
         np.random.shuffle(telabel)
 
-    te_batch = BatchGenerator_('val', telabel, batch_size, 10)
+    te_batch = BatchGenerator_('val', telabel, batch_size, 30)
 
     return te_batch
 
@@ -45,12 +45,17 @@ class BatchGenerator_(Sequence):
             img = cv.imread(img_dir)
             label = cv.imread(label_dir)
 
-            img = cv.GaussianBlur(img, (3, 3), 0)
+            # img = cv.GaussianBlur(img, (3, 3), 0)
+            # noise = np.random.normal(0, 1, [288, 512, 3])
+            # img = np.maximum(0, np.minimum(255, np.add(img, noise)))
+
+            img = cv.resize(img, (512, 288))
+            label = cv.resize(label, (512, 288))
 
             img = img / 255
             label = label / 255
 
-            label[(label[:, :, 0] == 0) & (label[:, :, 2] == 0)] = [0, 1, 0]
+            label[(label[:, :, 0] < 1 / 255) & (label[:, :, 2] < 1 / 255)] = [0, 1, 0]
 
             img_array.append(img)
             label_array.append(label)
@@ -72,3 +77,8 @@ class BatchGenerator_(Sequence):
     def on_epoch_end(self):
         # Tensorflow 버그로 작동 안함
         np.random.shuffle(self.label)
+        self.Match_(self.label, self.place)
+
+
+if __name__ == '__main__':
+    Load_tr()

@@ -3,7 +3,8 @@ import cv2 as cv
 import glob
 import Model
 
-model, epoch = Model.LoadSavedModel(answer='\n')
+model = Model.SegModel(3)
+model.load('\n')
 imgs = glob.glob('C:/bdd100k/images/100k/test/*')
 np.random.shuffle(imgs)
 threshold = 0.8

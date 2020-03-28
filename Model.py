@@ -42,15 +42,16 @@ class SegModel:
                 x = L.Concatenate()([x, y])
             return x
 
-    def down(self, tensor):
+    @staticmethod
+    def down(tensor):
         with K.name_scope('down'):
             x = L.MaxPool2D([2, 2])(tensor)
             return x
 
     def up(self, tensor1, tensor2):
         with K.name_scope('up'):
-            x = self.basic_conv(L.UpSampling2D()(tensor1), tensor2.shape.as_list()[-1])
-            x = self.concat(x, tensor2)
+            x = self.basic_conv(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
+            x = self.add(x, tensor2)
             return x
 
     @staticmethod
@@ -82,7 +83,7 @@ class SegModel:
         tensor = Input([288, 512, 3])
 
         d1 = self.basic_conv(tensor, self.channel)
-        d1 = self.sep_conv(d1, self.channel)
+        d1 = self.basic_conv(d1, self.channel)
 
         m = self.down(d1)
         d2 = self.sep_conv(m, self.channel * 2)
@@ -92,6 +93,18 @@ class SegModel:
 
         m = self.down(d3)
         d4 = self.sep_conv(m, self.channel * 6)
+
+        m = self.down(d4)
+        d5 = self.sep_conv(m, self.channel * 8)
+
+        m = self.down(d5)
+        d6 = self.sep_conv(m, self.channel * 10)  # -1x9x16x320
+        m = self.up(d6, d5)
+
+        d5 = self.sep_conv(m, self.channel * 8)
+        m = self.up(d5, d4)
+
+        d4 = self.sep_conv(m, self.channel * 6)
         m = self.up(d4, d3)
 
         d3 = self.sep_conv(m, self.channel * 4)
@@ -100,7 +113,7 @@ class SegModel:
         d2 = self.sep_conv(m, self.channel * 2)
         m = self.up(d2, d1)
 
-        d1 = self.sep_conv(m, self.channel)
+        d1 = self.basic_conv(m, self.channel)
         d1 = self.basic_conv(d1, self.channel)
 
         e = self.point_conv(d1)

@@ -11,7 +11,7 @@ threshold = 0.8
 
 for path in imgs[:10]:
     img = cv.imread(path)
-    img = cv.resize(img, (512, 288))
+    img = cv.resize(img, (512, 288), interpolation=cv.INTER_CUBIC)
     predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255
     predict[predict < (255 * threshold)] = 0
     predict[:, :, 1] = 0

@@ -1,4 +1,5 @@
 from tensorflow.keras.utils import Sequence
+import tensorflow as tf
 import cv2 as cv
 import numpy as np
 import glob
@@ -6,25 +7,17 @@ import glob
 ds_path = 'C:/bdd100k/'
 
 
-def Load_tr(shuffle=True, batch_size=8):
+def Load_tr(batch_size=4):
     trlabel = glob.glob(ds_path + 'drivable_maps/color_labels/train/*.png')
-
-    if shuffle:
-        np.random.shuffle(trlabel)
-
-    tr_batch = BatchGenerator_('train', trlabel, batch_size, 30)
-
+    np.random.shuffle(trlabel)
+    tr_batch = BatchGenerator_('train', trlabel, batch_size, 20)
     return tr_batch
 
 
-def Load_te(shuffle=True, batch_size=8):
+def Load_te(batch_size=4):
     telabel = glob.glob(ds_path + 'drivable_maps/color_labels/val/*.png')
-
-    if shuffle:
-        np.random.shuffle(telabel)
-
+    np.random.shuffle(telabel)
     te_batch = BatchGenerator_('val', telabel, batch_size, 30)
-
     return te_batch
 
 
@@ -42,6 +35,7 @@ class BatchGenerator_(Sequence):
         img_array = []
         label_array = []
         for img_dir, label_dir in zip(self.img_batch, self.label_batch):
+            cv.ocl.setUseOpenCL(True)
             img = cv.imread(img_dir)
             label = cv.imread(label_dir)
 
@@ -49,13 +43,13 @@ class BatchGenerator_(Sequence):
             # noise = np.random.normal(0, 1, [288, 512, 3])
             # img = np.maximum(0, np.minimum(255, np.add(img, noise)))
 
-            img = cv.resize(img, (512, 288))
-            label = cv.resize(label, (512, 288))
-
             img = img / 255
             label = label / 255
 
-            label[(label[:, :, 0] < 1 / 255) & (label[:, :, 2] < 1 / 255)] = [0, 1, 0]
+            img = cv.resize(img, (512, 288), interpolation=cv.INTER_CUBIC)
+            label = cv.resize(label, (512, 288), interpolation=cv.INTER_NEAREST)
+
+            label[(label[:, :, 0] == 0) & (label[:, :, 2] == 0)] = [[[0, 1, 0]]]
 
             img_array.append(img)
             label_array.append(label)

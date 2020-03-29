@@ -12,7 +12,7 @@ if gpus:
 def scheduler(epoch):
     warmup = 3
     warmup_lr = 1e-5
-    threshold = 25
+    threshold = 15
     lr = 1e-4
     lr2 = 5e-5
     if epoch < warmup:
@@ -28,7 +28,7 @@ def scheduler(epoch):
 callback = [
     ModelCheckpoint(path + 'model_{epoch:02d}-{val_iou_acc:.4f}_{iou_acc:.4f}.h5'),
     LearningRateScheduler(scheduler, verbose=1),
-    TensorBoard('D:/logs/', profile_batch=10000)
+    TensorBoard('D:/logs/', profile_batch=2)
 ]
 
 b = 4

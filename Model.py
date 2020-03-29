@@ -6,16 +6,18 @@ from tensorflow.keras import backend as K
 from tensorflow.keras import layers as L
 from tensorflow.keras import models
 
+smooth = 1
 
-def iou_acc(y_true, y_pred, smooth=1):
+
+def iou_acc(y_true, y_pred):
     intersection = K.sum(y_true * y_pred, axis=[1, 2, 3])
     union = K.sum(y_true, [1, 2, 3]) + K.sum(y_pred, [1, 2, 3]) - intersection
     iou = K.mean((intersection + smooth) / (union + smooth), axis=0)
     return iou
 
 
-def iou_loss(y_true, y_pred, smooth=1):
-    return 1 - iou_acc(y_true, y_pred, smooth)
+def iou_loss(y_true, y_pred):
+    return 1 - iou_acc(y_true, y_pred)
 
 
 class SegModel:
@@ -25,96 +27,96 @@ class SegModel:
         self.epoch = 0
 
     @staticmethod
-    def add(a, b):
+    def add(*args):
         with K.name_scope('add'):
-            x = L.Add()([a, b])
+            x = args[0]
+            for y in args[1:]:
+                x = L.Add()([x, y])
             return x
 
     @staticmethod
-    def concat(a, b):
+    def concat(*args):
         with K.name_scope('concat'):
-            x = L.Concatenate()([a, b])
+            x = args[0]
+            for y in args[1:]:
+                x = L.Concatenate()([x, y])
             return x
 
     @staticmethod
     def down(tensor):
         with K.name_scope('down'):
-            x = L.MaxPool2D()(tensor)
+            x = L.MaxPool2D([2, 2])(tensor)
             return x
 
     def up(self, tensor1, tensor2):
         with K.name_scope('up'):
-            x = self.conv_bn_relu(L.UpSampling2D()(tensor1), tensor2.shape.as_list()[-1])
+            x = self.basic_conv(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
             x = self.add(x, tensor2)
             return x
 
     @staticmethod
-    def conv_bn_relu(tensor, ch, atrous=(1, 1)):
-        with K.name_scope('3X3_conv_bn_relu'):
-            x = L.Conv2D(ch, 3, padding='same', dilation_rate=atrous)(tensor)
+    def sep_conv(tensor, ch, dilation=(1, 1), kernel=3):
+        with K.name_scope('3X3_sep_conv_bn_relu'):
+            x = L.DepthwiseConv2D(kernel, padding='same', dilation_rate=dilation)(tensor)
+            x = L.BatchNormalization()(x)
+            x = L.ReLU()(x)
+            x = L.Conv2D(ch, 1, padding='valid')(x)
             x = L.BatchNormalization()(x)
             x = L.ReLU()(x)
             return x
 
-    def resnet(self, tensor, ch):
-        with K.name_scope('resnet'):
-            x = self.conv_bn_relu(tensor, ch)
-            y = self.conv_bn_relu(x, ch)
-            y = self.conv_bn_relu(y, ch)
-            x = self.add(x, y)
+    @staticmethod
+    def basic_conv(tensor, ch, dilation=(1, 1), kernel=3):
+        with K.name_scope('3X3_basic_conv_bn_relu'):
+            x = L.Conv2D(ch, kernel, padding='same', dilation_rate=dilation)(tensor)
+            x = L.BatchNormalization()(x)
+            x = L.ReLU()(x)
             return x
 
-    def deeplab(self, tensor, ch):
-        with K.name_scope('atrous'):
-            a = self.conv_bn_relu(tensor, ch, (1, 1))
-            b = self.conv_bn_relu(tensor, ch, (3, 3))
-            x = self.add(a, b)
-            return x
-
-    def last_conv(self, tensor):
-        with K.name_scope('last_conv'):
-            x = L.Conv2D(self.class_num, 1, padding='same')(tensor)
+    def point_conv(self, tensor):
+        with K.name_scope('point_conv'):
+            x = L.Conv2D(self.class_num, 1, padding='valid')(tensor)
             x = L.Softmax()(x)
             return x
 
     def build(self):
         tensor = Input([288, 512, 3])
 
-        d1 = self.conv_bn_relu(tensor, self.channel)
-        d1 = self.conv_bn_relu(d1, self.channel)
+        d1 = self.basic_conv(tensor, self.channel)
+        d1 = self.basic_conv(d1, self.channel)
 
         m = self.down(d1)
-        d2 = self.conv_bn_relu(m, self.channel * 2)
+        d2 = self.sep_conv(m, self.channel * 2)
 
         m = self.down(d2)
-        d3 = self.conv_bn_relu(m, self.channel * 4)
+        d3 = self.sep_conv(m, self.channel * 4)
 
         m = self.down(d3)
-        d4 = self.conv_bn_relu(m, self.channel * 6)
+        d4 = self.sep_conv(m, self.channel * 6)
 
         m = self.down(d4)
-        d5 = self.conv_bn_relu(m, self.channel * 8)
+        d5 = self.sep_conv(m, self.channel * 8)
 
         m = self.down(d5)
-        d6 = self.conv_bn_relu(m, self.channel * 10)
+        d6 = self.sep_conv(m, self.channel * 10)  # -1x9x16x320
         m = self.up(d6, d5)
 
-        d5 = self.conv_bn_relu(m, self.channel * 8)
+        d5 = self.sep_conv(m, self.channel * 8)
         m = self.up(d5, d4)
 
-        d4 = self.conv_bn_relu(m, self.channel * 6)
+        d4 = self.sep_conv(m, self.channel * 6)
         m = self.up(d4, d3)
 
-        d3 = self.conv_bn_relu(m, self.channel * 4)
+        d3 = self.sep_conv(m, self.channel * 4)
         m = self.up(d3, d2)
 
-        d2 = self.conv_bn_relu(m, self.channel * 2)
+        d2 = self.sep_conv(m, self.channel * 2)
         m = self.up(d2, d1)
 
-        d1 = self.conv_bn_relu(m, self.channel)
-        d1 = self.conv_bn_relu(d1, self.channel)
+        d1 = self.basic_conv(m, self.channel)
+        d1 = self.basic_conv(d1, self.channel)
 
-        e = self.last_conv(d1)
+        e = self.point_conv(d1)
 
         self.model = Model(tensor, e)
         self.model.compile('adam', iou_loss, [iou_acc])
@@ -163,4 +165,4 @@ class SegModel:
 
 if __name__ == '__main__':
     model = SegModel(3)
-    model.load()
+    model.load('n')

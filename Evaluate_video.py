@@ -20,7 +20,7 @@ threshold = 0.8
 while vid.isOpened():
     load, image = vid.read()
     if load:
-        img = cv.resize(image, (512, 288))
+        img = cv.resize(image, (512, 288), interpolation=cv.INTER_CUBIC)
         # blur_img = cv.GaussianBlur(img, (3, 3), 0)
 
         predict = np.reshape(model.predict(np.expand_dims(img, axis=0) / 255), [288, 512, 3]) * 255

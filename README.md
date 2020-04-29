@@ -26,7 +26,8 @@ width: 512, height: 288
 * Road  
 ![Lane](https://user-images.githubusercontent.com/52787702/76678485-cbf1e800-661b-11ea-98b9-7e2df1577ce8.gif)
 
-#### Dataset License  
+### Dataset License  
+-------
 Copyright ©2018. The Regents of the University of California (Regents). All Rights Reserved. 
 
 Permission to use, copy, modify, and distribute this software and its documentation for educational, research, and not-for-profit purposes, without fee and without a signed licensing agreement; and permission use, copy, modify and distribute this software for commercial purposes (such rights not subject to transfer) to BDD member and its affiliates, is hereby granted, provided that the above copyright notice, this paragraph and the following two paragraphs appear in all copies, modifications, and distributions. Contact The Office of Technology Licensing, UC Berkeley, 2150 Shattuck Avenue, Suite 510, Berkeley, CA 94720-1620, (510) 643-7201, otl@berkeley.edu, http://ipira.berkeley.edu/industry-info for commercial licensing opportunities.

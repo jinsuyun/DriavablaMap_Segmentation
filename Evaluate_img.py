@@ -83,7 +83,6 @@ with tf.device('/gpu:0'):
 
     mean=tf.print(sum(mean_iou, 0.0) / len(mean_iou))
     print("Mean IoU : ", sum(mean_iou, 0.0) / len(mean_iou))
-    print(mean)
     # cv.imshow('imgpred', imgpred)
     # cv.imshow('original', img)
     # cv.waitKey()

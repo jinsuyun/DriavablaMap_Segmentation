@@ -50,7 +50,11 @@ class SegModel:
 
     def up(self, tensor1, tensor2):
         with K.name_scope('up'):
-            x = self.basic_conv(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
+            # x = self.basic_conv(L.UpSampling2D(interpolation='bilinear')(tensor1), tensor2.shape.as_list()[-1])
+            # x = self.add(x, tensor2)
+            x = L.UpSampling2D()(tensor1)
+            x = self.concat(x, tensor2)
+            x = self.basic_conv(x, tensor2.shape.as_list()[-1])
             x = self.add(x, tensor2)
             return x
 
@@ -86,31 +90,40 @@ class SegModel:
         d1 = self.basic_conv(d1, self.channel)
 
         m = self.down(d1)
-        d2 = self.sep_conv(m, self.channel * 2)
+        # d2 = self.sep_conv(m, self.channel * 2)
+        d2 = self.basic_conv(m, self.channel * 2)
 
         m = self.down(d2)
-        d3 = self.sep_conv(m, self.channel * 4)
+        # d3 = self.sep_conv(m, self.channel * 4)
+        d3 = self.basic_conv(m, self.channel * 4)
 
         m = self.down(d3)
-        d4 = self.sep_conv(m, self.channel * 6)
+        # d4 = self.sep_conv(m, self.channel * 6)
+        d4 = self.basic_conv(m, self.channel * 6)
 
         m = self.down(d4)
-        d5 = self.sep_conv(m, self.channel * 8)
+        # d5 = self.sep_conv(m, self.channel * 8)
+        d5 = self.basic_conv(m, self.channel * 8)
 
         m = self.down(d5)
-        d6 = self.sep_conv(m, self.channel * 10)  # -1x9x16x320
+        # d6 = self.sep_conv(m, self.channel * 10)  # -1x9x16x320
+        d6 = self.basic_conv(m, self.channel * 10)  # -1x9x16x320
         m = self.up(d6, d5)
 
-        d5 = self.sep_conv(m, self.channel * 8)
+        # d5 = self.sep_conv(m, self.channel * 8)
+        d5 = self.basic_conv(m, self.channel * 8)
         m = self.up(d5, d4)
 
-        d4 = self.sep_conv(m, self.channel * 6)
+        # d4 = self.sep_conv(m, self.channel * 6)
+        d4 = self.basic_conv(m, self.channel * 6)
         m = self.up(d4, d3)
 
-        d3 = self.sep_conv(m, self.channel * 4)
+        # d3 = self.sep_conv(m, self.channel * 4)
+        d3 = self.basic_conv(m, self.channel * 4)
         m = self.up(d3, d2)
 
-        d2 = self.sep_conv(m, self.channel * 2)
+        # d2 = self.sep_conv(m, self.channel * 2)
+        d2 = self.basic_conv(m, self.channel * 2)
         m = self.up(d2, d1)
 
         d1 = self.basic_conv(m, self.channel)
@@ -123,14 +136,14 @@ class SegModel:
         self.model.summary()
 
     def fit(self, tr_batch, te_batch, callback):
-        self.model.fit(tr_batch, validation_data=te_batch, callbacks=callback,
-                       epochs=self.epoch + 1, initial_epoch=self.epoch)
+        self.model.fit(tr_batch, validation_data=te_batch,callbacks=callback, epochs=self.epoch + 30, initial_epoch=self.epoch)
 
     def predict(self, img):
         return self.model.predict(img)
 
     def load(self, answer=None):
-        models_path = glob.glob('D:/Models/*.h5')
+        # models_path = glob.glob('D:/Models/*.h5')
+        models_path = glob.glob('Models/*.h5')
         if len(models_path):
             latest = max(models_path, key=os.path.getctime).replace('\\', '/')
             print('Found ' + str(latest))
@@ -149,11 +162,12 @@ class SegModel:
                     ans = input('Load? ([y]/n)')
                 if ans == 'n':
                     self.build()
-                    print('Passed')
+                    print('Model Load Passed')
                     break
                 elif len(ans.replace('\n', '')) == 0 or ans == 'y':
                     self.model = models.load_model(filepath, {'iou_loss': iou_loss, 'iou_acc': iou_acc})
                     self.epoch = int(filepath.split('-')[0].split('_')[-1])
+                    #iou_acc(y_pred=y_pred,y_true=y_true)
                     print('Loaded Model', self.epoch)
                     break
                 else:

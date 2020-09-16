@@ -2,11 +2,10 @@ import numpy as np
 import cv2 as cv
 import Model
 
-video_path = 'D:/20200124_164253.mp4'
-video_path = 'D:/20190301_214620.mp4'
-result_save1 = 'D:/Predict.mp4'
-result_save2 = 'D:/Mask.mp4'
-result_save3 = 'D:/Lane.mp4'
+video_path = 'test_video.mp4'
+result_save1 = 'result/Predict.mp4'
+result_save2 = 'result/Mask.mp4'
+result_save3 = 'result/Lane.mp4'
 model = Model.SegModel(3)
 model.load('\n')
 vid = cv.VideoCapture(video_path)

@@ -1,0 +1,8 @@
+kookmin_data/
+*.jpg
+*.png
+*.csv
+*.mp4
+*.h5
+Samples/
+Models/

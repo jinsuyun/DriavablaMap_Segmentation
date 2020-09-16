@@ -15,7 +15,6 @@ width: 512, height: 288
 **Blue.** *Alternative route* **Green.** *Background* **Red.** *Current route*  
 
 * **Memo**  
-몇년후에 대학에 가면 졸업과제로 자율주행을 내는게 ***목표***에요!
 
 # Samples
 --------

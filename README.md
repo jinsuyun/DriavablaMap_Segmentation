@@ -1,5 +1,8 @@
 # DrivableMap-Segmentation
 
+* **Command**  
+python Evaluate_img.py
+
 * **Structure**  
 *U-Net* based
 
